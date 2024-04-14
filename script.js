@@ -1,5 +1,4 @@
 /* TODO:
- - Reload if navigating via history to ensure up to date playlist/tracks
  - Switch play button to a stop when playing
  - Sort the tracks to ensure correct order
  */
@@ -232,6 +231,16 @@ function main() {
 
         // breakLoaded() is called when all tracks are loaded via the oncanplaythrough event and numLoading counter.
     });
+}
+
+/*
+ * Check if we arrived at the page via back/forward history. The contents might not be up to date,
+ * so better reload the page to be sure we have up to date data.
+ */
+const perfEntries = performance.getEntriesByType("navigation");
+if (perfEntries[0].type === "back_forward") {
+    console.log("History traversal detected, reloading to refresh data");
+    location.reload();
 }
 
 main();
