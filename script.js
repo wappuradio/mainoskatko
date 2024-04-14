@@ -4,7 +4,8 @@
  - Sort the tracks to ensure correct order
  */
 
-// Global state
+// Store the number of tracks which have been added but have not yet loaded.
+// - used to determine when the last track has loaded
 let numLoading = undefined;
 
 /**
@@ -30,8 +31,9 @@ async function getBreaks() {
 }
 
 /**
- * Return the break with the time closest to current clock. Does not
- * handle times around midnight
+ * Return the break with the time closest to current time. Does not
+ * handle times around midnight, which is accepted since ad breaks are
+ * limited to around office hours.
  */
 function getClosest(breaks) {
     let closestBreak = undefined;
@@ -41,6 +43,9 @@ function getClosest(breaks) {
     breaks.forEach((breakTimeString) => {
         const h = parseInt(breakTimeString.substring(0, 2));
         const m = parseInt(breakTimeString.substring(2,4));
+
+        // Construct a new date/time today, but with a HH:MM:00
+        // timestamp from the given break time
         let breakTime = new Date();
         breakTime.setHours(h, m, 0);
 
@@ -57,6 +62,9 @@ function getClosest(breaks) {
 
 /**
  * Fetch metadata about files related to a specific break
+ *
+ * Expects a JSON array with objects that have a `name` property
+ * which corresponds to the filename in the directory.
  */
 async function getBreakContents(breakTime) {
     const r = await fetch(`http://localhost:8080/katkot/${breakTime}/`);
@@ -69,6 +77,10 @@ async function getBreakContents(breakTime) {
 
 /* Creating the DOM elements */
 
+/**
+ * Create a new <audio> tag which loads the give track. The file is set to
+ * preload, and to trigger an event when loaded.
+ */
 function createTrack(track) {
     const container = document.createElement('div');
 
@@ -81,7 +93,8 @@ function createTrack(track) {
     const audio = document.createElement('audio');
     audio.oncanplaythrough = (context) => {
         numLoading -= 1;
-
+        // The numLoading was initialized to the number of tracks. Decrement the number here
+        // and if the counter reaches zero, we know that all tracks are loaded and we are ready for playback.
         if (numLoading === 0) {
             breakLoaded();
         }
@@ -154,7 +167,7 @@ function findNext(title) {
 /* Visualization */
 
 /**
- * Seconds to a MM:SS format
+ * Seconds to an MM:SS format
  */
 function formatTime(timeSeconds) {
     let wholeSeconds = Math.round(timeSeconds);
@@ -200,17 +213,24 @@ async function trackTimeUpdated(event) {
 }
 
 function main() {
+
+    // List the break times
     getBreaks().then((breaks) => {
         const closest = getClosest(breaks);
-        //const closest = "1900";
-
         document.getElementById("selectedBreak").innerText = closest;
+
+        // ... and get the tracks associated with the closest break
         return getBreakContents(closest);
     }).then((breakContents) => {
+        // initialize the counter which is used to determine when all tracks are loaded
         numLoading = breakContents.length;
+
+        // And create <audio> elements which actually load the tracks.
         for (const track of breakContents) {
             createTrack(track);
         }
+
+        // breakLoaded() is called when all tracks are loaded via the oncanplaythrough event and numLoading counter.
     });
 }
 
