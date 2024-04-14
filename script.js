@@ -3,10 +3,9 @@ let numLoading = undefined;
 
 async function getBreaks() {
     const r = await fetch("http://localhost:8080/katkot/");
-    const breaks = (await r.json()).map((o) => {
+    return (await r.json()).map((o) => {
         return o['name']
     });
-    return breaks;
 }
 
 function getClosest(breaks) {
@@ -33,8 +32,7 @@ function getClosest(breaks) {
 
 async function getBreakContents(breakTime) {
     const r = await fetch(`http://localhost:8080/katkot/${breakTime}/`);
-    const data = await r.json();
-    return data;
+    return await r.json();
 }
 
 function createTrack(breakTime, file) {
@@ -124,7 +122,6 @@ async function main() {
     for (const file of breakContents) {
         createTrack(closest, file);
     }
-    //console.log(breakContents);
 }
 
 main().then();
