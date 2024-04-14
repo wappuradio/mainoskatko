@@ -56,7 +56,9 @@ function createTrack(breakTime, file) {
     audio.title = file.name;
     audio.preload = "auto";
     audio.controls = true;
+
     audio.onended = trackFinished;
+    audio.ontimeupdate = trackTimeUpdated;
     container.appendChild(audio);
 
     container.appendChild(document.createElement("br"));
@@ -66,8 +68,8 @@ function createTrack(breakTime, file) {
 
 function formatTime(timeSeconds) {
     let wholeSeconds = Math.round(timeSeconds);
-    const m = Math.floor(wholeSeconds / 60).toString();
-    const s = (wholeSeconds % 60).toString();
+    const m = Math.floor(wholeSeconds / 60).toString().padStart(2, '0');
+    const s = (wholeSeconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`
 }
 
@@ -77,7 +79,9 @@ function breakLoaded() {
     for (const track of tracks) {
         totalDuration += track.duration;
     }
+    document.getElementById('progress').innerText = formatTime(0);
     document.getElementById('duration').innerText = formatTime(totalDuration);
+    document.getElementById('remaining').innerText = formatTime(totalDuration);
     const playButton = document.getElementById('masterPlay');
     playButton.onclick = startPlaying;
     playButton.style.visibility = 'visible';
@@ -100,6 +104,24 @@ function findNext(title) {
             passed = true;
         }
     }
+}
+
+async function trackTimeUpdated(event) {
+    const tracks = document.getElementsByTagName("audio");
+
+    let totalDuration = 0;
+    for (const track of tracks) {
+        totalDuration += track.duration;
+    }
+
+    let totalProgress = 0;
+    for (const track of tracks) {
+        totalProgress += track.currentTime;
+    }
+
+    const remaining = totalDuration - totalProgress;
+    document.getElementById('progress').innerText = formatTime(totalProgress);
+    document.getElementById('remaining').innerText = formatTime(remaining);
 }
 
 async function trackFinished(event) {
