@@ -23,7 +23,7 @@ let numLoading = undefined;
  *      003 - Loppujingle.mp3
  */
 async function getBreaks() {
-    const r = await fetch("http://localhost:8080/katkot/");
+    const r = await fetch("/katkot/");
     return (await r.json()).map((o) => {
         return o['name']
     });
@@ -66,10 +66,10 @@ function getClosest(breaks) {
  * which corresponds to the filename in the directory.
  */
 async function getBreakContents(breakTime) {
-    const r = await fetch(`http://localhost:8080/katkot/${breakTime}/`);
+    const r = await fetch(`/katkot/${breakTime}/`);
     const data = await r.json();
     return data.map((track) => {
-        track['url'] = `http://localhost:8080/katkot/${breakTime}/${track.name}`;
+        track['url'] = `/katkot/${breakTime}/${track.name}`;
         return track;
     })
 }
