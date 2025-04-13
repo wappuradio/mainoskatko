@@ -211,12 +211,27 @@ async function trackTimeUpdated(event) {
     document.getElementById('remaining').innerText = formatTime(remaining);
 }
 
+/**
+ * Check if the currently selected break is still relevant, or if a new one should be loaded
+ */
+function checkBreak(breaks, oldClosest) {
+    if(getClosest(breaks) != oldClosest) {
+        document.getElementById("oldBreak").style.visibility = "visible";
+        const dialog = document.getElementById("refreshDialog");
+        dialog.showModal();
+    }
+}
+
 function main() {
 
     // List the break times
     getBreaks().then((breaks) => {
         const closest = getClosest(breaks);
         document.getElementById("selectedBreak").innerText = closest;
+
+        breakCheckIntervalId = setInterval(() => {
+            checkBreak(breaks, closest);
+        }, 2*60*1000);
 
         // ... and get the tracks associated with the closest break
         return getBreakContents(closest);

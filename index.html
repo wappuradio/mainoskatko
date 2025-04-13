@@ -3,13 +3,21 @@
     <head>
         <link rel="stylesheet" href="bootstrap-3.4.1-dist/css/bootstrap.min.css">
         <script type="application/javascript" src="script.js"></script>
+        <style>
+            ::backdrop {
+                background-color: rgba(128,128,128,0.75);
+            }
+        </style>
         <title>Mainossoitin</title>
     </head>
     <body>
+        <dialog id="refreshDialog">
+            <a href="javascript:window.location.reload(true)">Lataa uusi katko</a>
+        </dialog>
         <div class="container">
             <h2>Mainossoitin</h2>
             <h3>
-                Katko: <span id="selectedBreak">loading...</span><br>
+                Katko: <span id="selectedBreak">loading...</span><span id="oldBreak" style="color: red; visibility: hidden;">!!</span><br>
                 Kesto: <span id="progress">loading...</span> / <span id="duration">loading...</span><br>
             </h3>
 
@@ -23,9 +31,9 @@
 
             <hr>
             <details id="player">
-		    <summary>Näytä soittolista</summary>
-		    <br>
-	    </details>
+                <summary>Näytä soittolista</summary>
+                <br>
+            </details>
         </div>
     </body>
 </html>
