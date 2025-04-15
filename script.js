@@ -30,6 +30,16 @@ async function getBreaks() {
 }
 
 /**
+ * Check if the URL contains an break override
+ * used to select a specific break instead of the closest one
+ */
+function getOverride() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return urlParams.get('break'); // may be null
+}
+
+/**
  * Return the break with the time closest to current time. Does not
  * handle times around midnight, which is accepted since ad breaks are
  * limited to around office hours.
@@ -226,7 +236,7 @@ function main() {
 
     // List the break times
     getBreaks().then((breaks) => {
-        const closest = getClosest(breaks);
+        const closest = getOverride() || getClosest(breaks);
         document.getElementById("selectedBreak").innerText = closest;
 
         breakCheckIntervalId = setInterval(() => {
